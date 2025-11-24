@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Moon, Sun, Globe, Bell, Eye, EyeOff, Trash2, User, Loader2 } from "lucide-react";
+import { ChevronLeft, Moon, Sun, Globe, Bell, Eye, EyeOff, User, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToastContext } from "@/components/ToastProvider";
 import { ProfileSkeleton } from "@/components/LoadingSkeleton";
@@ -36,6 +36,26 @@ export default function SettingsPage() {
     } else if (user) {
       setNewUsername(user.username);
       loadSettings();
+      
+      // Load theme and language from localStorage on mount
+      const savedTheme = localStorage.getItem('theme') as 'dark' | 'light' | null;
+      const savedLanguage = localStorage.getItem('language') as 'th' | 'en' | null;
+      
+      if (savedTheme) {
+        setSettings(prev => ({ ...prev, theme: savedTheme }));
+        if (savedTheme === 'light') {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.style.colorScheme = 'light';
+        } else {
+          document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = 'dark';
+        }
+      }
+      
+      if (savedLanguage) {
+        setSettings(prev => ({ ...prev, language: savedLanguage }));
+        document.documentElement.lang = savedLanguage;
+      }
     }
   }, [user, loading, router]);
 
@@ -183,7 +203,12 @@ export default function SettingsPage() {
             </h3>
             <div className="flex gap-2">
               <button
-                onClick={() => setSettings({ ...settings, theme: 'dark' })}
+                onClick={() => {
+                  setSettings({ ...settings, theme: 'dark' });
+                  // Apply immediately
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.style.colorScheme = 'dark';
+                }}
                 className={`flex-1 py-3 rounded-xl transition-colors ${
                   settings.theme === 'dark'
                     ? 'bg-purple-600 text-white'
@@ -194,7 +219,12 @@ export default function SettingsPage() {
                 ดาร์ก
               </button>
               <button
-                onClick={() => setSettings({ ...settings, theme: 'light' })}
+                onClick={() => {
+                  setSettings({ ...settings, theme: 'light' });
+                  // Apply immediately
+                  document.documentElement.classList.remove('dark');
+                  document.documentElement.style.colorScheme = 'light';
+                }}
                 className={`flex-1 py-3 rounded-xl transition-colors ${
                   settings.theme === 'light'
                     ? 'bg-purple-600 text-white'
@@ -215,7 +245,10 @@ export default function SettingsPage() {
             </h3>
             <div className="flex gap-2">
               <button
-                onClick={() => setSettings({ ...settings, language: 'th' })}
+                onClick={() => {
+                  setSettings({ ...settings, language: 'th' });
+                  document.documentElement.lang = 'th';
+                }}
                 className={`flex-1 py-3 rounded-xl transition-colors ${
                   settings.language === 'th'
                     ? 'bg-purple-600 text-white'
@@ -225,7 +258,10 @@ export default function SettingsPage() {
                 ไทย
               </button>
               <button
-                onClick={() => setSettings({ ...settings, language: 'en' })}
+                onClick={() => {
+                  setSettings({ ...settings, language: 'en' });
+                  document.documentElement.lang = 'en';
+                }}
                 className={`flex-1 py-3 rounded-xl transition-colors ${
                   settings.language === 'en'
                     ? 'bg-purple-600 text-white'
@@ -298,25 +334,6 @@ export default function SettingsPage() {
               </>
             ) : (
               "บันทึกการตั้งค่า"
-            )}
-          </button>
-
-          {/* Delete Account */}
-          <button
-            onClick={handleDeleteAccount}
-            disabled={deleting}
-            className="w-full bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 text-red-400 font-semibold py-4 px-6 rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {deleting ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                กำลังลบ...
-              </>
-            ) : (
-              <>
-                <Trash2 className="w-5 h-5" />
-                ลบบัญชี
-              </>
             )}
           </button>
         </div>
