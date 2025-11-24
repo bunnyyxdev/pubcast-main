@@ -7,6 +7,7 @@ import { ChevronLeft, Moon, Sun, Globe, Bell, Eye, EyeOff, User, Loader2 } from 
 import { useAuth } from "@/contexts/AuthContext";
 import { useToastContext } from "@/components/ToastProvider";
 import { ProfileSkeleton } from "@/components/LoadingSkeleton";
+import { PushNotificationManager } from "@/components/PushNotificationManager";
 
 interface UserSettings {
   theme: 'dark' | 'light';
@@ -274,13 +275,13 @@ export default function SettingsPage() {
           </div>
 
           {/* Notifications */}
-          <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+          <div className="bg-white/5 rounded-2xl p-6 border border-white/10 space-y-4">
+            <h3 className="text-lg font-bold flex items-center gap-2">
               <Bell className="w-5 h-5 text-purple-400" />
               การแจ้งเตือน
             </h3>
             <label className="flex items-center justify-between cursor-pointer">
-              <span>เปิดการแจ้งเตือน</span>
+              <span>เปิดการแจ้งเตือนในแอป</span>
               <input
                 type="checkbox"
                 checked={settings.notificationsEnabled}
@@ -288,6 +289,7 @@ export default function SettingsPage() {
                 className="w-5 h-5 rounded border-white/20 bg-white/5 text-purple-600 focus:ring-purple-500"
               />
             </label>
+            <PushNotificationManager />
           </div>
 
           {/* Privacy */}

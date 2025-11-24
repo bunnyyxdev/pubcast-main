@@ -546,10 +546,47 @@ function PostPageContent() {
             </>
           )}
 
-          {/* Step 3: Review */}
+          {/* Step 3: Review & Preview */}
           {currentStep === 3 && (
             <div className="space-y-6">
               <h2 className="text-xl font-bold">ตรวจสอบข้อมูล</h2>
+              
+              {/* Content Preview */}
+              <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-2xl p-6">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <span>📺</span>
+                  ตัวอย่างการแสดงผล
+                </h3>
+                
+                <div className="bg-black rounded-xl p-4 aspect-video flex flex-col items-center justify-center relative overflow-hidden">
+                  {!isMessageService && selectedImage ? (
+                    <>
+                      <Image 
+                        src={selectedImage} 
+                        alt="Preview" 
+                        fill 
+                        className="object-contain" 
+                        unoptimized 
+                      />
+                      {showTextWithImage && message && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                          <p className="text-white font-bold text-lg text-center">{message}</p>
+                          <p className="text-white/80 text-sm text-center mt-1">@{username}</p>
+                        </div>
+                      )}
+                    </>
+                  ) : isMessageService && message ? (
+                    <div className="text-center space-y-4">
+                      <p className="text-white text-2xl font-bold">{message}</p>
+                      <p className="text-white/80 text-lg">@{username}</p>
+                    </div>
+                  ) : (
+                    <div className="text-gray-500 text-center">
+                      <p>ไม่มีเนื้อหาให้แสดง</p>
+                    </div>
+                  )}
+                </div>
+              </div>
               
               <div className="bg-white/5 rounded-xl p-4 space-y-4">
                 <div>
@@ -557,26 +594,10 @@ function PostPageContent() {
                   <p className="font-bold">{selectedVariant?.name} - {selectedVariant?.price} บาท</p>
                 </div>
                 
-                {!isMessageService && selectedImage && (
-                  <div>
-                    <p className="text-sm text-gray-400 mb-2">รูปภาพ</p>
-                    <div className="relative w-full h-48 rounded-lg overflow-hidden">
-                      <Image src={selectedImage} alt="Preview" fill className="object-cover" unoptimized />
-                    </div>
-                  </div>
-                )}
-                
                 <div>
                   <p className="text-sm text-gray-400 mb-1">ชื่อวาร์ป</p>
                   <p className="font-bold">{username}</p>
                 </div>
-                
-                {message && (
-                  <div>
-                    <p className="text-sm text-gray-400 mb-1">ข้อความ</p>
-                    <p className="font-bold">{message}</p>
-                  </div>
-                )}
               </div>
 
               {/* Payment Status */}

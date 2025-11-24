@@ -6,7 +6,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { 
   ChevronLeft, Heart, MessageCircle, Share2, MoreVertical, 
-  UserPlus, UserMinus, Loader2, Send, Camera, Image as ImageIcon
+  UserPlus, UserMinus, Loader2, Send, Camera, Image as ImageIcon,
+  Search, Filter, TrendingUp, Star, Hash, X
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToastContext } from "@/components/ToastProvider";
@@ -24,6 +25,8 @@ interface Post {
   likesCount: number;
   commentsCount: number;
   isLiked: boolean;
+  category?: string;
+  tags?: string[];
 }
 
 interface Comment {
@@ -40,6 +43,7 @@ export default function DatingPage() {
   const { user } = useAuth();
   const toast = useToastContext();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [allPosts, setAllPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -47,7 +51,14 @@ export default function DatingPage() {
   const [newComment, setNewComment] = useState("");
   const [sendingComment, setSendingComment] = useState(false);
   const [followingUsers, setFollowingUsers] = useState<Set<number>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const categories = ['ทั้งหมด', 'รูปภาพ', 'ข้อความ', 'วิดีโอ'];
+  const popularTags = ['#trending', '#popular', '#new', '#featured'];
 
   useEffect(() => {
     if (user) {
@@ -57,6 +68,10 @@ export default function DatingPage() {
     }
   }, [user]);
 
+  useEffect(() => {
+    filterPosts();
+  }, [searchQuery, selectedCategory, selectedTag, allPosts]);
+
   const loadPosts = async () => {
     setLoading(true);
     try {
@@ -65,6 +80,7 @@ export default function DatingPage() {
       });
       if (response.ok) {
         const data = await response.json();
+        setAllPosts(data.posts || []);
         setPosts(data.posts || []);
       }
     } catch (error) {
@@ -73,6 +89,48 @@ export default function DatingPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const filterPosts = () => {
+    let filtered = [...allPosts];
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(post => 
+        post.content?.toLowerCase().includes(query) ||
+        post.username.toLowerCase().includes(query)
+      );
+    }
+
+    // Category filter
+    if (selectedCategory && selectedCategory !== 'ทั้งหมด') {
+      if (selectedCategory === 'รูปภาพ') {
+        filtered = filtered.filter(post => post.imageUrl);
+      } else if (selectedCategory === 'ข้อความ') {
+        filtered = filtered.filter(post => post.content && !post.imageUrl);
+      }
+    }
+
+    // Tag filter
+    if (selectedTag) {
+      filtered = filtered.filter(post => 
+        post.tags?.includes(selectedTag.replace('#', '')) ||
+        post.content?.includes(selectedTag)
+      );
+    }
+
+    setPosts(filtered);
+  };
+
+  const getTrendingPosts = () => {
+    return [...allPosts]
+      .sort((a, b) => (b.likesCount + b.commentsCount) - (a.likesCount + a.commentsCount))
+      .slice(0, 5);
+  };
+
+  const getFeaturedPosts = () => {
+    return allPosts.filter(post => post.likesCount > 10).slice(0, 5);
   };
 
   const loadComments = async (postId: number) => {
@@ -101,6 +159,17 @@ export default function DatingPage() {
       if (response.ok) {
         const data = await response.json();
         setPosts(prev =>
+          prev.map(post =>
+            post.id === postId
+              ? {
+                  ...post,
+                  isLiked: data.liked,
+                  likesCount: data.liked ? post.likesCount + 1 : post.likesCount - 1,
+                }
+              : post
+          )
+        );
+        setAllPosts(prev =>
           prev.map(post =>
             post.id === postId
               ? {
@@ -171,6 +240,13 @@ export default function DatingPage() {
               : post
           )
         );
+        setAllPosts(prev =>
+          prev.map(post =>
+            post.id === selectedPost.id
+              ? { ...post, commentsCount: post.commentsCount + 1 }
+              : post
+          )
+        );
       }
     } catch (error) {
       console.error("Failed to add comment:", error);
@@ -202,6 +278,9 @@ export default function DatingPage() {
     );
   }
 
+  const trendingPosts = getTrendingPosts();
+  const featuredPosts = getFeaturedPosts();
+
   return (
     <main className="min-h-screen bg-[#0a0a0a] text-white font-sans overflow-x-hidden flex justify-center">
       <div className="w-full max-w-[480px] min-h-screen bg-[#0f0f12] shadow-2xl relative flex flex-col border-x border-white/5">
@@ -211,22 +290,164 @@ export default function DatingPage() {
           <Link href="/" className="p-2 -ml-2 text-white/80 hover:text-white transition-colors">
             <ChevronLeft className="w-6 h-6" />
           </Link>
-          <h1 className="ml-2 text-lg font-bold">หาเพื่อน (Dating)</h1>
+          <h1 className="ml-2 text-lg font-bold flex-1">หาเพื่อน (Dating)</h1>
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="p-2 text-gray-400 hover:text-white transition-colors"
+          >
+            <Filter className="w-5 h-5" />
+          </button>
         </div>
+
+        {/* Search and Filters */}
+        <div className="p-4 space-y-3 border-b border-white/10">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="ค้นหาโพสต์..."
+              className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+
+          {showFilters && (
+            <div className="space-y-3">
+              {/* Categories */}
+              <div>
+                <p className="text-xs text-gray-400 mb-2">หมวดหมู่</p>
+                <div className="flex gap-2 flex-wrap">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat === selectedCategory ? null : cat)}
+                      className={`px-3 py-1 rounded-lg text-sm transition-colors ${
+                        selectedCategory === cat
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Popular Tags */}
+              <div>
+                <p className="text-xs text-gray-400 mb-2">แท็กยอดนิยม</p>
+                <div className="flex gap-2 flex-wrap">
+                  {popularTags.map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+                      className={`px-3 py-1 rounded-lg text-sm transition-colors flex items-center gap-1 ${
+                        selectedTag === tag
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                      }`}
+                    >
+                      <Hash className="w-3 h-3" />
+                      {tag.replace('#', '')}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Trending Section */}
+        {trendingPosts.length > 0 && (
+          <div className="p-4 border-b border-white/10">
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingUp className="w-5 h-5 text-orange-400" />
+              <h2 className="font-bold">กำลังฮิต</h2>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {trendingPosts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={`#post-${post.id}`}
+                  className="flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden border border-white/10 hover:border-purple-500/50 transition-colors"
+                >
+                  {post.imageUrl ? (
+                    <Image
+                      src={post.imageUrl}
+                      alt="Trending"
+                      width={96}
+                      height={96}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                      <MessageCircle className="w-6 h-6 text-white" />
+                    </div>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Featured Section */}
+        {featuredPosts.length > 0 && (
+          <div className="p-4 border-b border-white/10">
+            <div className="flex items-center gap-2 mb-3">
+              <Star className="w-5 h-5 text-yellow-400" />
+              <h2 className="font-bold">แนะนำ</h2>
+            </div>
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {featuredPosts.map((post) => (
+                <Link
+                  key={post.id}
+                  href={`#post-${post.id}`}
+                  className="flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden border-2 border-yellow-500/30 hover:border-yellow-500/50 transition-colors"
+                >
+                  {post.imageUrl ? (
+                    <Image
+                      src={post.imageUrl}
+                      alt="Featured"
+                      width={96}
+                      height={96}
+                      className="w-full h-full object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-yellow-600 to-orange-600 flex items-center justify-center">
+                      <Star className="w-6 h-6 text-white" />
+                    </div>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Posts Feed */}
         <div className="flex-1 overflow-y-auto pb-20">
           {posts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8 text-center">
               <UserPlus className="w-16 h-16 mb-4 opacity-50" />
-              <p className="text-sm">ยังไม่มีโพสต์</p>
-              <p className="text-xs mt-1">เริ่มติดตามผู้ใช้เพื่อดูโพสต์</p>
+              <p className="text-sm">ไม่พบโพสต์</p>
+              <p className="text-xs mt-1">ลองเปลี่ยนคำค้นหาหรือตัวกรอง</p>
             </div>
           ) : (
             <div className="space-y-4 p-4">
               {posts.map((post) => (
                 <div
                   key={post.id}
+                  id={`post-${post.id}`}
                   className="bg-[#1a1a2e] rounded-2xl overflow-hidden border border-white/10"
                 >
                   {/* Post Header */}
@@ -314,7 +535,7 @@ export default function DatingPage() {
                       >
                         <MessageCircle className="w-6 h-6" />
                       </button>
-                      <ShareButton url={`${window.location.origin}/post/${post.id}`} />
+                      <ShareButton url={`${typeof window !== 'undefined' ? window.location.origin : ''}/post/${post.id}`} />
                     </div>
 
                     {/* Likes Count */}
@@ -332,15 +553,35 @@ export default function DatingPage() {
                           {formatTextWithLinks(post.content).map((part: TextPart, idx: number) => {
                             if (part.type === 'mention') {
                               return (
-                                <span key={idx} className="text-purple-400 font-semibold">
+                                <Link
+                                  key={idx}
+                                  href={`/user/${part.content.replace('@', '')}`}
+                                  className="text-purple-400 font-semibold hover:underline"
+                                >
                                   {part.content}
-                                </span>
+                                </Link>
                               );
                             } else if (part.type === 'hashtag') {
                               return (
-                                <span key={idx} className="text-blue-400 font-semibold">
+                                <button
+                                  key={idx}
+                                  onClick={() => setSelectedTag(part.content)}
+                                  className="text-blue-400 font-semibold hover:underline"
+                                >
                                   {part.content}
-                                </span>
+                                </button>
+                              );
+                            } else if (part.type === 'link') {
+                              return (
+                                <a
+                                  key={idx}
+                                  href={part.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-400 hover:underline"
+                                >
+                                  {part.content}
+                                </a>
                               );
                             }
                             return <span key={idx}>{part.content}</span>;

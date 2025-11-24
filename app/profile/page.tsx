@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, User, Phone, Calendar, LogOut, Camera, X, Loader2, Settings } from "lucide-react";
+import { ChevronLeft, User, Phone, Calendar, LogOut, Camera, X, Loader2, Settings, BarChart3, DollarSign, Clock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToastContext } from "@/components/ToastProvider";
 import { ProfileSkeleton } from "@/components/LoadingSkeleton";
@@ -330,14 +330,37 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Settings Button */}
-          <Link
-            href="/settings"
-            className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
-          >
-            <Settings className="w-5 h-5" />
-            การตั้งค่า
-          </Link>
+          {/* Quick Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            <Link
+              href="/dashboard"
+              className="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
+            >
+              <BarChart3 className="w-5 h-5" />
+              สถิติ
+            </Link>
+            <Link
+              href="/payment-history"
+              className="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
+            >
+              <DollarSign className="w-5 h-5" />
+              ประวัติ
+            </Link>
+            <Link
+              href="/queue"
+              className="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
+            >
+              <Clock className="w-5 h-5" />
+              คิว
+            </Link>
+            <Link
+              href="/settings"
+              className="bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
+            >
+              <Settings className="w-5 h-5" />
+              ตั้งค่า
+            </Link>
+          </div>
 
           {/* Logout Button */}
           <button

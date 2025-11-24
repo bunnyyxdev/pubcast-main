@@ -128,6 +128,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Try to create table if it doesn't exist
+    try {
+      await query(
+        `CREATE TABLE IF NOT EXISTS posts (
+          id SERIAL PRIMARY KEY,
+          user_id INTEGER NOT NULL,
+          content TEXT,
+          image_url TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )`
+      );
+    } catch (e) {
+      // Table might already exist, continue
+    }
+
     const result = await query(
       'INSERT INTO posts (user_id, content, image_url) VALUES ($1, $2, $3) RETURNING id',
       [parseInt(userId), content || null, imageUrl || null]
