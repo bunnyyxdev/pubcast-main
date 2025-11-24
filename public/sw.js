@@ -12,17 +12,43 @@ const urlsToCache = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
+      .then((cache) => {
+        // Try to cache, but don't fail if some resources are missing
+        return Promise.allSettled(
+          urlsToCache.map(url => 
+            cache.add(url).catch(err => {
+              console.warn(`Failed to cache ${url}:`, err);
+              return null;
+            })
+          )
+        );
+      })
+      .then(() => self.skipWaiting()) // Activate immediately
   );
 });
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
+  // Only handle GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
         // Return cached version or fetch from network
-        return response || fetch(event.request);
+        if (response) {
+          return response;
+        }
+        return fetch(event.request).catch(err => {
+          console.warn('Fetch failed:', err);
+          // Return a basic offline response for navigation requests
+          if (event.request.mode === 'navigate') {
+            return caches.match('/offline') || new Response('Offline', { status: 503 });
+          }
+          throw err;
+        });
       })
   );
 });

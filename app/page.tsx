@@ -38,6 +38,10 @@ export default function MainPage() {
       })
       .catch(err => {
         console.error("Failed to fetch settings:", err);
+        // Use default values on error
+        setPromoText("แจกวาร์ปขึ้นจอ");
+        setPromoSubtext("ส่งข้อความและรูปภาพขึ้นจอ");
+        setServices([]);
         setLoading(false);
       });
   }, []);
