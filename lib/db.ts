@@ -25,7 +25,7 @@ export function getSql() {
 
 /**
  * Execute a parameterized query (for compatibility with existing code)
- * Converts $1, $2, etc. to template literal format for Neon
+ * Converts $1, $2, etc. placeholders to tagged template literals for Neon
  */
 export async function query(text: string, params?: any[]): Promise<{ rows: any[]; rowCount: number }> {
   const sql = getSql();
@@ -33,7 +33,7 @@ export async function query(text: string, params?: any[]): Promise<{ rows: any[]
   
   try {
     if (params && params.length > 0) {
-      // Convert parameterized query ($1, $2, etc.) to template literal
+      // Convert parameterized query ($1, $2, etc.) to tagged template literal
       // Split by $1, $2, etc. and build template literal
       const parts: string[] = [];
       const values: any[] = [];
@@ -42,13 +42,23 @@ export async function query(text: string, params?: any[]): Promise<{ rows: any[]
       // Find all $1, $2, etc. positions
       const paramRegex = /\$(\d+)/g;
       let match;
-      let paramIndex = 0;
+      const paramIndices = new Set<number>();
       
+      // First pass: collect all parameter indices
+      while ((match = paramRegex.exec(text)) !== null) {
+        const index = parseInt(match[1]);
+        paramIndices.add(index);
+      }
+      
+      // Reset regex
+      paramRegex.lastIndex = 0;
+      
+      // Second pass: build template parts and values
       while ((match = paramRegex.exec(text)) !== null) {
         // Add text before the parameter
         parts.push(text.substring(lastIndex, match.index));
         
-        // Get parameter index
+        // Get parameter index (convert from 1-based to 0-based)
         const index = parseInt(match[1]) - 1;
         if (params[index] !== undefined) {
           values.push(params[index]);
@@ -57,21 +67,24 @@ export async function query(text: string, params?: any[]): Promise<{ rows: any[]
         }
         
         lastIndex = match.index + match[0].length;
-        paramIndex++;
       }
       
       // Add remaining text
       parts.push(text.substring(lastIndex));
       
-      // Execute using template literal
-      const result = await sql(parts as any, ...values);
+      // Execute using tagged template literal
+      // Neon expects: sql`text ${value1} text ${value2}`
+      // Create proper TemplateStringsArray with raw property
+      const templateStrings = parts as unknown as TemplateStringsArray;
+      (templateStrings as any).raw = parts;
+      const result = await (sql as any)(templateStrings, ...values);
       const duration = Date.now() - start;
       const rows = Array.isArray(result) ? result : [result];
       console.log('Executed query', { duration, rows: rows.length });
       return { rows, rowCount: rows.length };
     } else {
-      // No parameters, execute directly
-      const result = await sql([text] as any);
+      // No parameters, use tagged template literal directly
+      const result = await (sql as any)`${text}`;
       const duration = Date.now() - start;
       const rows = Array.isArray(result) ? result : [result];
       console.log('Executed query', { duration, rows: rows.length });
