@@ -232,52 +232,22 @@ export default function ChatPage() {
                   </div>
 
                   {/* Message Content */}
-                  <div className={`flex flex-col max-w-[70%] ${isOwnMessage ? "items-end" : "items-start"} relative group`}>
+                  <div className={`flex flex-col max-w-[70%] ${isOwnMessage ? "items-end" : "items-start"}`}>
                     {!isOwnMessage && (
                       <span className="text-xs text-gray-400 mb-1 px-2">
                         {msg.username}
                       </span>
                     )}
-                    <div className="flex items-start gap-2">
-                      <div
-                        className={`rounded-2xl px-4 py-2 ${
-                          isOwnMessage
-                            ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
-                            : "bg-white/10 text-white border border-white/10"
-                        }`}
-                      >
-                        <p className="text-sm whitespace-pre-wrap break-words">
-                          {msg.message}
-                        </p>
-                      </div>
-                      {/* Delete Button - Only show for own messages */}
-                      {isOwnMessage && (
-                        <div className="relative">
-                          <button
-                            onClick={() => setShowDeleteMenu(showDeleteMenu === msg.id ? null : msg.id)}
-                            className="p-1.5 text-gray-400 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
-                            disabled={deletingMessageId === msg.id}
-                          >
-                            {deletingMessageId === msg.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <MoreVertical className="w-4 h-4" />
-                            )}
-                          </button>
-                          {/* Delete Menu */}
-                          {showDeleteMenu === msg.id && (
-                            <div className="absolute right-0 top-8 bg-[#1a1a2e] border border-white/10 rounded-lg shadow-xl z-20 min-w-[120px]">
-                              <button
-                                onClick={() => handleDeleteMessage(msg.id)}
-                                className="w-full px-4 py-2 text-left text-red-400 hover:bg-red-500/10 flex items-center gap-2 rounded-lg transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                                <span className="text-sm">ลบข้อความ</span>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                    <div
+                      className={`rounded-2xl px-4 py-2 ${
+                        isOwnMessage
+                          ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+                          : "bg-white/10 text-white border border-white/10"
+                      }`}
+                    >
+                      <p className="text-sm whitespace-pre-wrap break-words">
+                        {msg.message}
+                      </p>
                     </div>
                     <span className="text-xs text-gray-500 mt-1 px-2">
                       {formatTime(msg.createdAt)}
@@ -290,14 +260,6 @@ export default function ChatPage() {
           <div ref={messagesEndRef} />
           </div>
         </PullToRefresh>
-
-        {/* Click outside to close delete menu */}
-        {showDeleteMenu && (
-          <div
-            className="fixed inset-0 z-10"
-            onClick={() => setShowDeleteMenu(null)}
-          />
-        )}
 
         {/* Input Area */}
         <div className="sticky bottom-0 p-4 bg-[#0f0f12]/80 backdrop-blur-md border-t border-white/10">

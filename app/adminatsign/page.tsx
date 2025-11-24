@@ -2,10 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Settings, LogOut, DollarSign, Tag } from "lucide-react";
+import { Settings, LogOut, DollarSign, Tag, MessageSquare, Trash2, Loader2 } from "lucide-react";
+import { useToastContext } from "@/components/ToastProvider";
+
+interface ChatMessage {
+  id: number;
+  userId: string;
+  username: string;
+  message: string;
+  createdAt: string;
+}
 
 export default function AdminPage() {
   const router = useRouter();
+  const toast = useToastContext();
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showLogin, setShowLogin] = useState(true);
@@ -19,6 +29,11 @@ export default function AdminPage() {
   const [promoText, setPromoText] = useState("");
   const [promoSubtext, setPromoSubtext] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Chat messages state
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [loadingMessages, setLoadingMessages] = useState(false);
+  const [deletingMessageId, setDeletingMessageId] = useState<number | null>(null);
 
   // Check authentication
   useEffect(() => {
