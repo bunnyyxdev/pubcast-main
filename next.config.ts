@@ -4,17 +4,28 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "pubcastplusstorage132639-prod.s3.ap-southeast-1.amazonaws.com",
+        protocol: 'https',
+        hostname: '**',
       },
       {
-        protocol: "https",
-        hostname: "resize-img.pubcastplus.com",
+        protocol: 'http',
+        hostname: '**',
       },
     ],
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60,
   },
-  turbopack: {
-    root: process.cwd(),
+  // Enable compression
+  compress: true,
+  // Enable React strict mode
+  reactStrictMode: true,
+  // Performance optimizations
+  poweredByHeader: false,
+  // Experimental features for better performance
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@neondatabase/serverless'],
   },
 };
 
