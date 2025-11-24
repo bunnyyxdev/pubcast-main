@@ -150,12 +150,12 @@ export default function AdminPage() {
       });
 
       if (response.ok) {
-        alert("บันทึกการตั้งค่าสำเร็จ!");
+        toast.success("บันทึกการตั้งค่าสำเร็จ!");
       } else {
-        alert("เกิดข้อผิดพลาดในการบันทึก");
+        toast.error("เกิดข้อผิดพลาดในการบันทึก");
       }
     } catch (error) {
-      alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setSaving(false);
     }
@@ -175,6 +175,69 @@ export default function AdminPage() {
     }
     setServices(updatedServices);
   };
+
+  // Load chat messages
+  const loadMessages = async () => {
+    setLoadingMessages(true);
+    try {
+      const response = await fetch("/api/chat/messages?limit=100", {
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.messages && Array.isArray(data.messages)) {
+          setMessages(data.messages);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load messages:", error);
+      toast.error("ไม่สามารถโหลดข้อความได้");
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
+
+  // Delete message
+  const handleDeleteMessage = async (messageId: number) => {
+    if (!confirm('คุณต้องการลบข้อความนี้หรือไม่?')) {
+      return;
+    }
+
+    setDeletingMessageId(messageId);
+
+    try {
+      const response = await fetch(`/api/admin/chat/delete?message_id=${messageId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        toast.success("ลบข้อความสำเร็จ");
+        // Remove message from local state
+        setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+      } else {
+        const data = await response.json();
+        const errorMsg = data.error || "เกิดข้อผิดพลาดในการลบข้อความ";
+        toast.error(errorMsg);
+      }
+    } catch (error) {
+      console.error("Failed to delete message:", error);
+      toast.error("เกิดข้อผิดพลาดในการลบข้อความ");
+    } finally {
+      setDeletingMessageId(null);
+    }
+  };
+
+  // Load messages when authenticated
+  useEffect(() => {
+    if (authenticated) {
+      loadMessages();
+      // Refresh messages every 5 seconds
+      const interval = setInterval(loadMessages, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [authenticated]);
 
   if (loading) {
     return (
