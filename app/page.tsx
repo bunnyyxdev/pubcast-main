@@ -10,14 +10,9 @@ import { twMerge } from "tailwind-merge";
 import LoginModal from "@/components/LoginModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
-import { StatisticsWidget } from "@/components/widgets/StatisticsWidget";
 import { OnlineUsersWidget } from "@/components/widgets/OnlineUsersWidget";
-import { RecentActivityWidget } from "@/components/widgets/RecentActivityWidget";
 import { QuickActionsWidget } from "@/components/widgets/QuickActionsWidget";
 import { AnnouncementWidget } from "@/components/widgets/AnnouncementWidget";
-import { ClockWidget } from "@/components/widgets/ClockWidget";
-import { QuickStatsWidget } from "@/components/widgets/QuickStatsWidget";
-import { LeaderboardWidget } from "@/components/widgets/LeaderboardWidget";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
@@ -133,9 +128,6 @@ export default function MainPage() {
         {/* Announcement Widget */}
         <AnnouncementWidget />
 
-        {/* Clock Widget */}
-        <ClockWidget />
-
         {/* Online Users Widget */}
         <OnlineUsersWidget />
 
@@ -172,12 +164,6 @@ export default function MainPage() {
 
         {/* Quick Actions Widget */}
         <QuickActionsWidget />
-
-        {/* Statistics Widget */}
-        <StatisticsWidget />
-
-        {/* Quick Stats Widget */}
-        <QuickStatsWidget />
 
         {/* Services Grid */}
         <div className="grid grid-cols-2 gap-3">
@@ -243,12 +229,6 @@ export default function MainPage() {
             </button>
           ))}
         </div>
-
-        {/* Recent Activity Widget */}
-        <RecentActivityWidget />
-
-        {/* Leaderboard Widget */}
-        <LeaderboardWidget />
       </div>
 
       {/* Bottom Navigation */}
