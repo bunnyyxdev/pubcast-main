@@ -28,7 +28,6 @@ export default function SettingsPage() {
     privacyShowActivity: true,
   });
   const [saving, setSaving] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [newUsername, setNewUsername] = useState("");
 
   useEffect(() => {
@@ -66,18 +65,28 @@ export default function SettingsPage() {
         body: JSON.stringify(settings),
       });
 
-      if (response.ok) {
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         toast.success("บันทึกการตั้งค่าสำเร็จ");
-        // Apply theme
+        // Apply theme immediately
         if (settings.theme === 'light') {
           document.documentElement.classList.remove('dark');
+          document.documentElement.style.colorScheme = 'light';
         } else {
           document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = 'dark';
         }
+        // Apply language
+        document.documentElement.lang = settings.language;
+        // Store in localStorage for persistence
+        localStorage.setItem('theme', settings.theme);
+        localStorage.setItem('language', settings.language);
       } else {
-        toast.error("เกิดข้อผิดพลาดในการบันทึก");
+        toast.error(data.error || "เกิดข้อผิดพลาดในการบันทึก");
       }
     } catch (error) {
+      console.error("Save settings error:", error);
       toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
     } finally {
       setSaving(false);
@@ -110,32 +119,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleDeleteAccount = async () => {
-    if (!confirm('คุณแน่ใจหรือไม่? การกระทำนี้ไม่สามารถยกเลิกได้')) {
-      return;
-    }
-
-    setDeleting(true);
-    try {
-      const response = await fetch("/api/user/delete", {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        toast.success("ลบบัญชีสำเร็จ");
-        logout();
-        router.push("/");
-      } else {
-        const data = await response.json();
-        toast.error(data.error || "เกิดข้อผิดพลาด");
-      }
-    } catch (error) {
-      toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-    } finally {
-      setDeleting(false);
-    }
-  };
 
   if (loading) {
     return (
