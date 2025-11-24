@@ -13,20 +13,11 @@ import { query } from '@/lib/db';
 export async function GET(request: NextRequest) {
   try {
     // Count users who have been active in the last 5 minutes
-    // Active means: sent a message, logged in, or updated their profile
+    // Active means: visited any page (updated_at reflects last activity)
     const result = await query(
-      `SELECT COUNT(DISTINCT user_id) as count
-       FROM (
-         SELECT user_id, created_at as activity_time
-         FROM messages
-         WHERE created_at > NOW() - INTERVAL '5 minutes'
-         
-         UNION
-         
-         SELECT id as user_id, updated_at as activity_time
-         FROM users
-         WHERE updated_at > NOW() - INTERVAL '5 minutes'
-       ) AS active_users`,
+      `SELECT COUNT(*) as count
+       FROM users
+       WHERE updated_at > NOW() - INTERVAL '5 minutes'`,
       []
     );
 
