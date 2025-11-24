@@ -11,7 +11,6 @@ import LoginModal from "@/components/LoginModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 import { OnlineUsersWidget } from "@/components/widgets/OnlineUsersWidget";
-import { QuickActionsWidget } from "@/components/widgets/QuickActionsWidget";
 import { AnnouncementWidget } from "@/components/widgets/AnnouncementWidget";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
@@ -161,9 +160,6 @@ export default function MainPage() {
             </h3>
             <span className="text-[10px] text-gray-500 uppercase tracking-wider font-medium">Services</span>
         </div>
-
-        {/* Quick Actions Widget */}
-        <QuickActionsWidget />
 
         {/* Services Grid */}
         <div className="grid grid-cols-2 gap-3">
