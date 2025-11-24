@@ -10,6 +10,14 @@ import { twMerge } from "tailwind-merge";
 import LoginModal from "@/components/LoginModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
+import { StatisticsWidget } from "@/components/widgets/StatisticsWidget";
+import { OnlineUsersWidget } from "@/components/widgets/OnlineUsersWidget";
+import { RecentActivityWidget } from "@/components/widgets/RecentActivityWidget";
+import { QuickActionsWidget } from "@/components/widgets/QuickActionsWidget";
+import { AnnouncementWidget } from "@/components/widgets/AnnouncementWidget";
+import { ClockWidget } from "@/components/widgets/ClockWidget";
+import { QuickStatsWidget } from "@/components/widgets/QuickStatsWidget";
+import { LeaderboardWidget } from "@/components/widgets/LeaderboardWidget";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
@@ -122,6 +130,15 @@ export default function MainPage() {
       </div>
 
       <div className="px-4 space-y-5 relative z-10 pb-10">
+        {/* Announcement Widget */}
+        <AnnouncementWidget />
+
+        {/* Clock Widget */}
+        <ClockWidget />
+
+        {/* Online Users Widget */}
+        <OnlineUsersWidget />
+
         {/* Promo Banner */}
         <div className="group relative w-full h-24 rounded-2xl overflow-hidden cursor-pointer">
             <div className="absolute inset-0 bg-gradient-to-r from-violet-600 via-purple-600 to-pink-600 transition-transform duration-500 group-hover:scale-105"></div>
