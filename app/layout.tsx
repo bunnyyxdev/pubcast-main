@@ -4,6 +4,8 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/components/ToastProvider";
 import { UserActivityTracker } from "@/components/UserActivityTracker";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PWARegister } from "@/components/PWARegister";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const notoSansThai = Noto_Sans_Thai({ 
@@ -15,6 +17,14 @@ const notoSansThai = Noto_Sans_Thai({
 export const metadata: Metadata = {
   title: "แจกวาร์ปขึ้นจอ At Sign Club ระบบ PubCast+",
   description: "ระบบแจกวาร์ป แจกทิป Donate ขึ้นจอ และ Live Stream",
+  manifest: "/manifest.json",
+  themeColor: "#9333ea",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "PubCast",
+  },
 };
 
 export default function RootLayout({
@@ -25,12 +35,15 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body className={`${inter.variable} ${notoSansThai.variable} font-sans antialiased bg-[#F7F7F9]`}>
-        <AuthProvider>
-          <ToastProvider>
-            <UserActivityTracker />
-            {children}
-          </ToastProvider>
-        </AuthProvider>
+        <ErrorBoundary>
+          <PWARegister />
+          <AuthProvider>
+            <ToastProvider>
+              <UserActivityTracker />
+              {children}
+            </ToastProvider>
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

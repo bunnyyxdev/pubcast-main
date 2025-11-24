@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, User, Phone, Calendar, LogOut, Camera, X, Loader2 } from "lucide-react";
+import { ChevronLeft, User, Phone, Calendar, LogOut, Camera, X, Loader2, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToastContext } from "@/components/ToastProvider";
 import { ProfileSkeleton } from "@/components/LoadingSkeleton";
@@ -329,6 +329,15 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+
+          {/* Settings Button */}
+          <Link
+            href="/settings"
+            className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2"
+          >
+            <Settings className="w-5 h-5" />
+            การตั้งค่า
+          </Link>
 
           {/* Logout Button */}
           <button
