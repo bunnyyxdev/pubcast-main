@@ -39,10 +39,10 @@ async function test() {
       console.log('   Table names:', tableRows.map(t => t.table_name).join(', '));
     }
     
-    // Test parameterized query using query() function
-    const { query } = require('../lib/db');
-    const testQuery = await query('SELECT COUNT(*) as count FROM users WHERE id = $1', [999999]);
-    console.log('   Test query() function: ✅');
+    // Test parameterized query using template literal
+    const testQuery = await sql`SELECT COUNT(*) as count FROM users WHERE id = ${999999}`;
+    const testRow = Array.isArray(testQuery) ? testQuery[0] : testQuery;
+    console.log('   Test template literal query: ✅');
     
     console.log('\n✅ Connection test passed!');
   } catch (error) {
