@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { getSql } from '@/lib/db';
 
 /**
  * GET /api/settings
@@ -7,13 +7,16 @@ import { query } from '@/lib/db';
  */
 export async function GET(request: NextRequest) {
   try {
-    const result = await query(
-      'SELECT setting_key, setting_value FROM settings WHERE setting_key IN ($1, $2, $3)',
-      ['services', 'promo_text', 'promo_subtext']
-    );
+    const sql = getSql();
+    const result = await sql`
+      SELECT setting_key, setting_value 
+      FROM settings 
+      WHERE setting_key IN (${'services'}, ${'promo_text'}, ${'promo_subtext'})
+    `;
 
     const settingsObj: Record<string, any> = {};
-    result.rows.forEach((setting: any) => {
+    const rows = Array.isArray(result) ? result : [result];
+    rows.forEach((setting: any) => {
       try {
         settingsObj[setting.setting_key] = JSON.parse(setting.setting_value);
       } catch {
