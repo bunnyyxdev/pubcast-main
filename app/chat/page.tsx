@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Send, User as UserIcon, Loader2, Trash2, MoreVertical } from "lucide-react";
+import { ChevronLeft, Send, User as UserIcon, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
 import { useToastContext } from "@/components/ToastProvider";
@@ -28,8 +28,6 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [deletingMessageId, setDeletingMessageId] = useState<number | null>(null);
-  const [showDeleteMenu, setShowDeleteMenu] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const lastMessageIdRef = useRef<number>(0);
@@ -130,41 +128,6 @@ export default function ChatPage() {
       toast.error("เกิดข้อผิดพลาดในการส่งข้อความ");
     } finally {
       setSending(false);
-    }
-  };
-
-  // Delete message
-  const handleDeleteMessage = async (messageId: number) => {
-    if (!user) return;
-    
-    // Show confirmation
-    if (!confirm('คุณต้องการลบข้อความนี้หรือไม่?')) {
-      return;
-    }
-
-    setDeletingMessageId(messageId);
-    setShowDeleteMenu(null);
-
-    try {
-      const response = await fetch(`/api/chat/messages?message_id=${messageId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        toast.success("ลบข้อความสำเร็จ");
-        // Remove message from local state
-        setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
-      } else {
-        const data = await response.json();
-        const errorMsg = data.error || "เกิดข้อผิดพลาดในการลบข้อความ";
-        toast.error(errorMsg);
-      }
-    } catch (error) {
-      console.error("Failed to delete message:", error);
-      toast.error("เกิดข้อผิดพลาดในการลบข้อความ");
-    } finally {
-      setDeletingMessageId(null);
     }
   };
 
