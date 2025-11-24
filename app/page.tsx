@@ -170,6 +170,15 @@ export default function MainPage() {
             <span className="text-[10px] text-gray-500 uppercase tracking-wider font-medium">Services</span>
         </div>
 
+        {/* Quick Actions Widget */}
+        <QuickActionsWidget />
+
+        {/* Statistics Widget */}
+        <StatisticsWidget />
+
+        {/* Quick Stats Widget */}
+        <QuickStatsWidget />
+
         {/* Services Grid */}
         <div className="grid grid-cols-2 gap-3">
           {services.map((service, idx) => (
@@ -234,6 +243,12 @@ export default function MainPage() {
             </button>
           ))}
         </div>
+
+        {/* Recent Activity Widget */}
+        <RecentActivityWidget />
+
+        {/* Leaderboard Widget */}
+        <LeaderboardWidget />
       </div>
 
       {/* Bottom Navigation */}
