@@ -42,9 +42,9 @@ export default function RootLayout({
     <html lang="th">
       <body className={`${inter.variable} ${notoSansThai.variable} font-sans antialiased bg-[#0a0a0a] text-white`}>
         <ErrorBoundary>
-          <PWARegister />
           <AuthProvider>
             <ToastProvider>
+              <PWARegister />
               <UserActivityTracker />
               {children}
             </ToastProvider>
