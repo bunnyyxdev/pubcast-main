@@ -18,13 +18,19 @@ export const metadata: Metadata = {
   title: "แจกวาร์ปขึ้นจอ At Sign Club ระบบ PubCast+",
   description: "ระบบแจกวาร์ป แจกทิป Donate ขึ้นจอ และ Live Stream",
   manifest: "/manifest.json",
-  themeColor: "#9333ea",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "PubCast",
   },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#9333ea",
 };
 
 export default function RootLayout({
@@ -34,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="th">
-      <body className={`${inter.variable} ${notoSansThai.variable} font-sans antialiased bg-[#F7F7F9]`}>
+      <body className={`${inter.variable} ${notoSansThai.variable} font-sans antialiased bg-[#0a0a0a] text-white`}>
         <ErrorBoundary>
           <PWARegister />
           <AuthProvider>
