@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-noto-sans-thai), var(--font-inter), sans-serif;
+}
+
+/* Custom Utilities for PB-safe area if needed */
+.pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+}
