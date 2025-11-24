@@ -27,7 +27,7 @@ export function getSql() {
  * Execute a parameterized query (for compatibility with existing code)
  * Converts $1, $2, etc. to template literal format for Neon
  */
-export async function query(text: string, params?: any[]) {
+export async function query(text: string, params?: any[]): Promise<{ rows: any[]; rowCount: number }> {
   const sql = getSql();
   const start = Date.now();
   
