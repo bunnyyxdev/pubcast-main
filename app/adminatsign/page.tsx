@@ -381,6 +381,78 @@ export default function AdminPage() {
             </div>
           )}
 
+          {/* Chat Management Section */}
+          <div className="bg-[#1a1a2e] rounded-2xl p-6 border border-white/10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <MessageSquare className="w-5 h-5 text-purple-400" />
+                <h2 className="text-xl font-bold">จัดการแชท</h2>
+              </div>
+              <button
+                onClick={loadMessages}
+                disabled={loadingMessages}
+                className="text-sm text-purple-400 hover:text-purple-300 transition-colors disabled:opacity-50"
+              >
+                {loadingMessages ? "กำลังโหลด..." : "รีเฟรช"}
+              </button>
+            </div>
+
+            {loadingMessages && messages.length === 0 ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-6 h-6 animate-spin text-purple-400" />
+              </div>
+            ) : messages.length === 0 ? (
+              <div className="text-center py-12 text-gray-400">
+                <p>ยังไม่มีข้อความ</p>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className="bg-[#0a0a0a] rounded-xl p-4 border border-white/5 hover:border-white/10 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-sm font-semibold text-white">
+                            {msg.username}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            #{msg.userId}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(msg.createdAt).toLocaleString("th-TH", {
+                              day: "numeric",
+                              month: "short",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-300 whitespace-pre-wrap break-words">
+                          {msg.message}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteMessage(msg.id)}
+                        disabled={deletingMessageId === msg.id}
+                        className="flex-shrink-0 p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors disabled:opacity-50"
+                        title="ลบข้อความ"
+                      >
+                        {deletingMessageId === msg.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Save Button */}
           <button
             onClick={handleSaveSettings}
