@@ -8,16 +8,29 @@ export function OnlineUsersWidget() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate online users count
-    const updateCount = () => {
-      // TODO: Replace with real WebSocket or API polling
-      const count = Math.floor(Math.random() * 50) + 20; // 20-70 users
-      setOnlineCount(count);
-      setLoading(false);
+    const fetchOnlineCount = async () => {
+      try {
+        const response = await fetch('/api/stats/online', {
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setOnlineCount(data.count || 0);
+        } else {
+          console.error('Failed to fetch online users count');
+          setOnlineCount(0);
+        }
+      } catch (error) {
+        console.error('Error fetching online users:', error);
+        setOnlineCount(0);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    updateCount();
-    const interval = setInterval(updateCount, 5000); // Update every 5 seconds
+    fetchOnlineCount();
+    const interval = setInterval(fetchOnlineCount, 5000); // Update every 5 seconds
     return () => clearInterval(interval);
   }, []);
 

@@ -11,7 +11,6 @@ import LoginModal from "@/components/LoginModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 import { OnlineUsersWidget } from "@/components/widgets/OnlineUsersWidget";
-import { AnnouncementWidget } from "@/components/widgets/AnnouncementWidget";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
@@ -124,9 +123,6 @@ export default function MainPage() {
       </div>
 
       <div className="px-4 space-y-5 relative z-10 pb-10">
-        {/* Announcement Widget */}
-        <AnnouncementWidget />
-
         {/* Online Users Widget */}
         <OnlineUsersWidget />
 
