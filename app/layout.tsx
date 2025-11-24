@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Noto_Sans_Thai } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ToastProvider } from "@/components/ToastProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const notoSansThai = Noto_Sans_Thai({ 
@@ -24,7 +25,9 @@ export default function RootLayout({
     <html lang="th">
       <body className={`${inter.variable} ${notoSansThai.variable} font-sans antialiased bg-[#F7F7F9]`}>
         <AuthProvider>
-          {children}
+          <ToastProvider>
+            {children}
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

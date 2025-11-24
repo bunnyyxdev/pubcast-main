@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X, Loader2, UserPlus } from "lucide-react";
 import RegistrationModal from "./RegistrationModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToastContext } from "@/components/ToastProvider";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export default function LoginModal({
   onSuccess,
 }: LoginModalProps) {
   const { login } = useAuth();
+  const toast = useToastContext();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +47,9 @@ export default function LoginModal({
         if (data.error === "ไม่พบบัญชีผู้ใช้") {
           setShowNoAccountPopup(true);
         } else {
-          setError(data.error || "เกิดข้อผิดพลาดในการเข้าสู่ระบบ");
+          const errorMsg = data.error || "เกิดข้อผิดพลาดในการเข้าสู่ระบบ";
+          setError(errorMsg);
+          toast.error(errorMsg);
         }
         setLoading(false);
         return;
@@ -61,6 +65,9 @@ export default function LoginModal({
         console.error('Error refreshing user after login:', err);
       });
 
+      // Show success toast
+      toast.success(`ยินดีต้อนรับ ${data.user.username}!`);
+
       // Call success callback if provided
       if (onSuccess) {
         onSuccess(data.user);
@@ -71,11 +78,11 @@ export default function LoginModal({
       setError(null);
       onClose();
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์"
-      );
+      const errorMsg = err instanceof Error
+        ? err.message
+        : "เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์";
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

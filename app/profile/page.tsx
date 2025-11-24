@@ -5,9 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, User, Phone, Calendar, LogOut, Camera, X, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToastContext } from "@/components/ToastProvider";
+import { ProfileSkeleton } from "@/components/LoadingSkeleton";
 
 export default function ProfilePage() {
   const { user, loading, logout, refreshUser } = useAuth();
+  const toast = useToastContext();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [profilePhoto, setProfilePhoto] = useState<string | null>(user?.profilePhoto || null);
@@ -88,13 +91,17 @@ export default function ProfilePage() {
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      setError('กรุณาเลือกรูปภาพเท่านั้น');
+      const errorMsg = 'กรุณาเลือกรูปภาพเท่านั้น';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
     // Validate file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
-      setError('ขนาดรูปภาพต้องไม่เกิน 2MB');
+      const errorMsg = 'ขนาดรูปภาพต้องไม่เกิน 2MB';
+      setError(errorMsg);
+      toast.error(errorMsg);
       return;
     }
 
@@ -150,8 +157,11 @@ export default function ProfilePage() {
           setProfilePhoto(base64String);
           // Refresh user data
           await refreshUser();
+          toast.success('อัพโหลดรูปโปรไฟล์สำเร็จ');
         } catch (err) {
-          setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ');
+          const errorMsg = err instanceof Error ? err.message : 'เกิดข้อผิดพลาดในการอัพโหลดรูปภาพ';
+          setError(errorMsg);
+          toast.error(errorMsg);
         } finally {
           setUploading(false);
         }
@@ -192,8 +202,11 @@ export default function ProfilePage() {
 
       setProfilePhoto(null);
       await refreshUser();
+      toast.success('ลบรูปโปรไฟล์สำเร็จ');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาดในการลบรูปภาพ');
+      const errorMsg = err instanceof Error ? err.message : 'เกิดข้อผิดพลาดในการลบรูปภาพ';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setUploading(false);
     }
@@ -202,8 +215,11 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <main className="min-h-screen bg-[#0a0a0a] text-white font-sans overflow-x-hidden flex justify-center">
-        <div className="w-full max-w-[480px] min-h-screen bg-[#0f0f12] shadow-2xl relative flex flex-col border-x border-white/5 items-center justify-center">
-          <p className="text-gray-400">กำลังโหลด...</p>
+        <div className="w-full max-w-[480px] min-h-screen bg-[#0f0f12] shadow-2xl relative flex flex-col border-x border-white/5">
+          <div className="p-4 flex items-center border-b border-white/10">
+            <h1 className="ml-2 text-lg font-bold">โปรไฟล์</h1>
+          </div>
+          <ProfileSkeleton />
         </div>
       </main>
     );

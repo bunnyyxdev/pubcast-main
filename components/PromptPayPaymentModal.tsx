@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { X, CheckCircle2, Loader2 } from "lucide-react";
+import { ConfettiBurst } from "@/components/Confetti";
+import { useToastContext } from "@/components/ToastProvider";
 
 interface PromptPayPaymentModalProps {
   isOpen: boolean;
@@ -26,12 +28,14 @@ export default function PromptPayPaymentModal({
   username,
   serviceType,
 }: PromptPayPaymentModalProps) {
+  const toast = useToastContext();
   const [loading, setLoading] = useState(false);
   const [qrData, setQrData] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
   const [verifyingPayment, setVerifyingPayment] = useState(false);
   const [isPaymentError, setIsPaymentError] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Generate QR code when modal opens
   useEffect(() => {
@@ -106,21 +110,27 @@ export default function PromptPayPaymentModal({
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError(data.error || 'ไม่สามารถส่งการแจ้งเตือน LINE ได้ กรุณาติดต่อ @pubcastplus');
+        const errorMsg = data.error || 'ไม่สามารถส่งการแจ้งเตือน LINE ได้ กรุณาติดต่อ @pubcastplus';
+        setError(errorMsg);
+        toast.error(errorMsg);
         setIsPaymentError(true);
         setVerifyingPayment(false);
         return;
       }
 
       // If notification was sent successfully, proceed with payment completion
-    setPaymentConfirmed(true);
+      setPaymentConfirmed(true);
+      setShowConfetti(true);
+      toast.success('ชำระเงินสำเร็จ! ขอบคุณสำหรับการชำระเงิน');
       setVerifyingPayment(false);
-    // Call the callback after a short delay to show confirmation
-    setTimeout(() => {
-      onPaymentComplete();
-    }, 2000);
+      // Call the callback after a short delay to show confirmation
+      setTimeout(() => {
+        onPaymentComplete();
+      }, 2000);
     } catch (err) {
-      setError('เกิดข้อผิดพลาดในการตรวจสอบการชำระเงิน กรุณาติดต่อ @pubcastplus');
+      const errorMsg = 'เกิดข้อผิดพลาดในการตรวจสอบการชำระเงิน กรุณาติดต่อ @pubcastplus';
+      setError(errorMsg);
+      toast.error(errorMsg);
       setIsPaymentError(true);
       setVerifyingPayment(false);
     }
@@ -129,8 +139,10 @@ export default function PromptPayPaymentModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-[#1a1a2e] rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-purple-500/30">
+    <>
+      <ConfettiBurst trigger={showConfetti} />
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="bg-[#1a1a2e] rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-purple-500/30">
         {/* Header */}
         <div className="p-6 border-b border-white/10 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-white">ชำระเงิน</h2>
@@ -272,8 +284,9 @@ export default function PromptPayPaymentModal({
             </>
           )}
         </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

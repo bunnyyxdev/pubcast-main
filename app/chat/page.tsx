@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, Send, User as UserIcon, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
+import { useToastContext } from "@/components/ToastProvider";
+import { PullToRefresh } from "@/components/PullToRefresh";
+import { ChatSkeleton } from "@/components/LoadingSkeleton";
 
 interface Message {
   id: number;
@@ -19,6 +22,7 @@ interface Message {
 
 export default function ChatPage() {
   const { user, loading: authLoading } = useAuth();
+  const toast = useToastContext();
   const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -65,6 +69,7 @@ export default function ChatPage() {
       }
     } catch (error) {
       console.error("Failed to fetch messages:", error);
+      toast.error("ไม่สามารถโหลดข้อความได้");
     } finally {
       setLoading(false);
     }
@@ -110,15 +115,17 @@ export default function ChatPage() {
 
       if (response.ok) {
         setNewMessage("");
+        toast.success("ส่งข้อความสำเร็จ");
         // Fetch messages again to get the new one
         await fetchMessages();
       } else {
         const data = await response.json();
-        alert(data.error || "เกิดข้อผิดพลาดในการส่งข้อความ");
+        const errorMsg = data.error || "เกิดข้อผิดพลาดในการส่งข้อความ";
+        toast.error(errorMsg);
       }
     } catch (error) {
       console.error("Failed to send message:", error);
-      alert("เกิดข้อผิดพลาดในการส่งข้อความ");
+      toast.error("เกิดข้อผิดพลาดในการส่งข้อความ");
     } finally {
       setSending(false);
     }
@@ -148,9 +155,11 @@ export default function ChatPage() {
   if (authLoading || loading) {
     return (
       <main className="min-h-screen bg-[#0a0a0a] text-white font-sans overflow-x-hidden flex justify-center">
-        <div className="w-full max-w-[480px] min-h-screen bg-[#0f0f12] shadow-2xl relative flex flex-col border-x border-white/5 items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
-          <p className="text-gray-400 mt-4">กำลังโหลด...</p>
+        <div className="w-full max-w-[480px] min-h-screen bg-[#0f0f12] shadow-2xl relative flex flex-col border-x border-white/5">
+          <div className="p-4 flex items-center border-b border-white/10">
+            <h1 className="ml-2 text-lg font-bold">แชท (Chat)</h1>
+          </div>
+          <ChatSkeleton />
         </div>
       </main>
     );
@@ -176,11 +185,12 @@ export default function ChatPage() {
           </div>
         </div>
 
-        {/* Messages Container */}
-        <div 
-          ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto p-4 space-y-4 pb-24"
-        >
+        {/* Messages Container with Pull-to-Refresh */}
+        <PullToRefresh onRefresh={fetchMessages}>
+          <div 
+            ref={messagesContainerRef}
+            className="flex-1 overflow-y-auto p-4 space-y-4 pb-24"
+          >
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">
               <UserIcon className="w-16 h-16 mb-4 opacity-50" />
@@ -248,7 +258,8 @@ export default function ChatPage() {
             })
           )}
           <div ref={messagesEndRef} />
-        </div>
+          </div>
+        </PullToRefresh>
 
         {/* Input Area */}
         <div className="sticky bottom-0 p-4 bg-[#0f0f12]/80 backdrop-blur-md border-t border-white/10">

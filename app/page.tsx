@@ -9,6 +9,7 @@ import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import LoginModal from "@/components/LoginModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { PageSkeleton } from "@/components/LoadingSkeleton";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
@@ -46,11 +47,7 @@ export default function MainPage() {
   };
 
   if (loading) {
-    return (
-      <main className="min-h-screen bg-[#0a0a0a] text-white font-sans flex items-center justify-center">
-        <p className="text-gray-400">กำลังโหลด...</p>
-      </main>
-    );
+    return <PageSkeleton />;
   }
 
   return (
