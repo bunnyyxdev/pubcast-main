@@ -60,7 +60,20 @@ export async function GET(request: NextRequest) {
     sqlQuery += ` ORDER BY p.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     params.push(limit, offset);
 
-    const result = await query(sqlQuery, params);
+    // Try to execute query, if table doesn't exist, return empty array
+    let result;
+    try {
+      result = await query(sqlQuery, params);
+    } catch (dbError: any) {
+      // If posts table doesn't exist, return empty array
+      if (dbError.message?.includes('does not exist') || dbError.message?.includes('relation')) {
+        return NextResponse.json({
+          posts: [],
+          pagination: { page, limit },
+        });
+      }
+      throw dbError;
+    }
 
     return NextResponse.json({
       posts: result.rows.map((row: any) => ({

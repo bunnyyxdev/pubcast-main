@@ -1,52 +1,55 @@
-/**
- * Parse text for mentions (@username) and hashtags (#tag)
- */
-export interface ParsedText {
-  text: string;
-  mentions: string[];
-  hashtags: string[];
-}
-
-export function parseText(text: string): ParsedText {
-  const mentions: string[] = [];
-  const hashtags: string[] = [];
-
-  // Find mentions (@username)
-  const mentionRegex = /@(\w+)/g;
-  let match;
-  while ((match = mentionRegex.exec(text)) !== null) {
-    mentions.push(match[1]);
-  }
-
-  // Find hashtags (#tag)
-  const hashtagRegex = /#(\w+)/g;
-  while ((match = hashtagRegex.exec(text)) !== null) {
-    hashtags.push(match[1]);
-  }
-
-  return {
-    text,
-    mentions,
-    hashtags,
-  };
-}
-
-/**
- * Convert text with mentions and hashtags to formatted string
- * Returns array of objects with type and content
- */
 export interface TextPart {
-  type: 'text' | 'mention' | 'hashtag';
+  type: 'text' | 'mention' | 'hashtag' | 'link';
   content: string;
+  url?: string;
 }
 
 export function formatTextWithLinks(text: string): TextPart[] {
   const parts: TextPart[] = [];
-  const regex = /(@\w+|#\w+)/g;
   let lastIndex = 0;
-  let match;
 
-  while ((match = regex.exec(text)) !== null) {
+  // Regex patterns
+  const mentionPattern = /@(\w+)/g;
+  const hashtagPattern = /#(\w+)/g;
+  const urlPattern = /(https?:\/\/[^\s]+)/g;
+
+  // Find all matches
+  const matches: Array<{ type: 'mention' | 'hashtag' | 'link'; index: number; length: number; content: string; url?: string }> = [];
+
+  let match;
+  while ((match = mentionPattern.exec(text)) !== null) {
+    matches.push({
+      type: 'mention',
+      index: match.index,
+      length: match[0].length,
+      content: match[0],
+    });
+  }
+
+  while ((match = hashtagPattern.exec(text)) !== null) {
+    matches.push({
+      type: 'hashtag',
+      index: match.index,
+      length: match[0].length,
+      content: match[0],
+    });
+  }
+
+  while ((match = urlPattern.exec(text)) !== null) {
+    matches.push({
+      type: 'link',
+      index: match.index,
+      length: match[0].length,
+      content: match[0],
+      url: match[0],
+    });
+  }
+
+  // Sort matches by index
+  matches.sort((a, b) => a.index - b.index);
+
+  // Build parts
+  for (const match of matches) {
     // Add text before match
     if (match.index > lastIndex) {
       parts.push({
@@ -55,21 +58,14 @@ export function formatTextWithLinks(text: string): TextPart[] {
       });
     }
 
-    // Add link
-    const content = match[0];
-    if (content.startsWith('@')) {
-      parts.push({
-        type: 'mention',
-        content,
-      });
-    } else if (content.startsWith('#')) {
-      parts.push({
-        type: 'hashtag',
-        content,
-      });
-    }
+    // Add match
+    parts.push({
+      type: match.type,
+      content: match.content,
+      url: match.url,
+    });
 
-    lastIndex = match.index + match[0].length;
+    lastIndex = match.index + match.length;
   }
 
   // Add remaining text
@@ -82,4 +78,3 @@ export function formatTextWithLinks(text: string): TextPart[] {
 
   return parts.length > 0 ? parts : [{ type: 'text', content: text }];
 }
-

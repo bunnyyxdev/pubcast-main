@@ -11,7 +11,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useToastContext } from "@/components/ToastProvider";
 import { ShareButton } from "@/components/ShareButton";
-import { formatTextWithLinks, TextPart } from "@/utils/textParser";
+import { formatTextWithLinks, type TextPart } from "@/utils/textParser";
 
 interface Post {
   id: number;
