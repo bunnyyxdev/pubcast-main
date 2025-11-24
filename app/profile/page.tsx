@@ -25,47 +25,19 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (user?.profilePhoto) {
-      // Validate that profilePhoto is a valid data URL or URL
       const photo = user.profilePhoto;
+      // Simple validation: check if it's a valid data URL or HTTP URL
       if (photo && typeof photo === 'string' && photo.trim().length > 0) {
-        // Check if it's a valid data URL
-        if (photo.startsWith('data:image/')) {
-          // Check if the image was truncated (TEXT column limit is 65535 bytes)
-          // If the photo is exactly 65535 characters, it was likely truncated
-          if (photo.length === 65535) {
-            console.warn('Profile photo appears to be truncated (TEXT column limit). Please re-upload.');
-            setProfilePhoto(null);
-            setError('รูปภาพถูกตัดทอน กรุณาอัพโหลดใหม่ (ภาพอาจใหญ่เกินไป)');
-            return;
-          }
-          
-          // Validate base64 format: should have comma and base64 data after
-          const parts = photo.split(',');
-          if (parts.length === 2 && parts[1] && parts[1].trim().length > 100) {
-            // Check if base64 data looks valid
-            const base64Data = parts[1].trim();
-            // Basic validation: base64 should only contain valid characters
-            const base64Regex = /^[A-Za-z0-9+/=]*$/;
-            if (base64Regex.test(base64Data)) {
-              // Format looks valid, set it and let the img tag handle loading
-              setProfilePhoto(photo);
-            } else {
-              console.warn('Invalid base64 characters in profile photo');
-              setProfilePhoto(null);
-            }
-          } else {
-            console.warn('Invalid data URL format or incomplete base64 data', {
-              partsLength: parts.length,
-              dataLength: parts[1]?.length
-            });
-            setProfilePhoto(null);
-          }
-        } else if (photo.startsWith('http://') || photo.startsWith('https://')) {
-          // HTTP URL format looks valid
+        // Check for truncated images (TEXT column limit)
+        if (photo.length === 65535) {
+          setProfilePhoto(null);
+          setError('รูปภาพถูกตัดทอน กรุณาอัพโหลดใหม่ (ภาพอาจใหญ่เกินไป)');
+          return;
+        }
+        // Set photo if it looks valid (data URL or HTTP URL)
+        if (photo.startsWith('data:image/') || photo.startsWith('http://') || photo.startsWith('https://')) {
           setProfilePhoto(photo);
         } else {
-          // Invalid format, clear it
-          console.warn('Profile photo has invalid format');
           setProfilePhoto(null);
         }
       } else {
@@ -128,7 +100,7 @@ export default function ProfilePage() {
           return;
         }
         
-        // Validate base64 data exists
+        // Basic validation: check if base64 data exists
         const parts = base64String.split(',');
         if (parts.length !== 2 || !parts[1] || parts[1].length < 100) {
           setError('ข้อมูลรูปภาพไม่สมบูรณ์');

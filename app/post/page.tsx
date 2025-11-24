@@ -9,11 +9,13 @@ import Image from "next/image";
 import PromptPayPaymentModal from "@/components/PromptPayPaymentModal";
 import LoginModal from "@/components/LoginModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { useToastContext } from "@/components/ToastProvider";
 
 function PostPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading, login } = useAuth();
+  const toast = useToastContext();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedService, setSelectedService] = useState<string>("image");
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
@@ -136,21 +138,21 @@ function PostPageContent() {
       // For message service, only require message and username
       if (isMessageService) {
         if (!message.trim()) {
-          alert("กรุณาใส่ข้อความ");
+          toast.error("กรุณาใส่ข้อความ");
           return;
         }
         if (!username.trim()) {
-          alert("กรุณาใส่ชื่อวาร์ปของคุณ");
+          toast.error("กรุณาใส่ชื่อวาร์ปของคุณ");
           return;
         }
       } else {
         // For image/video service, require image
         if (!selectedImage) {
-          alert("กรุณาอัพโหลดรูปภาพ");
+          toast.error("กรุณาอัพโหลดรูปภาพ");
           return;
         }
         if (!username.trim()) {
-          alert("กรุณาใส่ชื่อวาร์ปของคุณ");
+          toast.error("กรุณาใส่ชื่อวาร์ปของคุณ");
           return;
         }
       }

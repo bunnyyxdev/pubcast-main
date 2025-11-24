@@ -11,6 +11,7 @@ import LoginModal from "@/components/LoginModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageSkeleton } from "@/components/LoadingSkeleton";
 import { OnlineUsersWidget } from "@/components/widgets/OnlineUsersWidget";
+import { MessageListWidget } from "@/components/widgets/MessageListWidget";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
   return twMerge(clsx(inputs));
@@ -221,6 +222,9 @@ export default function MainPage() {
             </button>
           ))}
         </div>
+
+        {/* Message List Widget */}
+        <MessageListWidget />
       </div>
 
       {/* Bottom Navigation */}
